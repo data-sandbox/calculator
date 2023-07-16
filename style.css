@@ -1,0 +1,76 @@
+:root {
+    --primary-gray: rgb(244, 244, 246);
+    --primary-black: rgb(27, 27, 28);
+    --primary-white: white;
+}
+
+html {
+    background-color: var(--primary-gray);
+    text-align: center;
+    font-family: monospace;
+    font-size: 18px;
+}
+
+main {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 3rem;
+}
+
+.calculator {
+    max-width: 300px;
+    width: 100%;
+}
+
+.display-container {
+    padding: 1rem;
+    border: 1px solid var(--primary-black);
+    margin-bottom: 0.5rem;
+    border-radius: 0.3rem;
+}
+
+.display,
+.equation {
+    text-align: right;
+    height: 1rem;
+}
+
+.equation {
+    color: grey;
+    margin-bottom: 0.5rem;
+}
+
+.button-container {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    height: 100%;
+    grid-gap: .5rem;
+}
+
+.number,
+.operator,
+.clear,
+.todo {
+    padding: 1rem;
+    border-radius: 0.3rem;
+    border: 1px solid var(--primary-black);
+}
+
+/* .operator {
+    background-color: lightgrey;
+} */
+
+footer {
+    margin-top: 2rem;
+}
+
+.fa-github {
+    color: var(--primary-black);
+    font-size: 24px;
+    transition: transform 0.5s ease-in-out;
+}
+
+.fa-github:hover {
+    transform: rotate(360deg) scale(1.2);
+}

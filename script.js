@@ -151,6 +151,142 @@ function insertPercent() {
     document.getElementById('display-value').textContent = displayValue;
 }
 
+
+// NEW FEATURES BELOW
+
+const Calculator = (() => {
+
+    const values = [null, null];
+    let currentValue = null;
+    let operation = null;
+
+    const add = (values) => values[0] + values[1];
+    const subtract = (values) => values[0] - values[1];
+    const multiply = (values) => values[0] * values[1];
+    const divide = (values) => {
+        if (values[1] === 0) return 'undefined';
+        return values[0] / values[1];
+    }
+
+    const getValue = (value) => {
+        currentValue = value; // input from console or pull from DOM
+        updateValues();
+    }
+
+    const getOperator = (operator) => operation = operator;
+
+    const updateValues = () => {
+        if (values[0] !== null && values[1] !== null) {
+            evalExpression(values, operation);
+        } else if (values[0] !== null && values[1] === null) {
+            storeValue(1, currentValue);
+        } else {
+            storeValue(0, currentValue);
+            storeValue(1, null);
+        }
+    };
+
+    const storeValue = (index, value) => {
+        values[index] = value;
+    };
+
+    const clearValues = () => {
+        values[0] = null;
+        values[1] = null;
+    }
+
+    const storeCurrentValue = () => {
+        storeValue(0, currentValue);
+        storeValue(1, null);
+    }
+
+    const evalExpression = () => {
+        switch (operation) {
+            case 'add':
+                currentValue = add(values);
+                break;
+            case 'subtract':
+                currentValue = subtract(values);
+                break;
+            case 'multiply':
+                currentValue = multiply(values);
+                break;
+            case 'divide':
+                currentValue = divide(values);
+                break;
+        };
+        storeCurrentValue();
+    }
+
+    const printValue = () => console.log(currentValue);
+
+    const printArray = () => console.log(values); // for debug
+
+    return {
+        getValue,
+        getOperator,
+        evalExpression,
+        printValue,
+        printArray // for debug
+    }
+
+});
+
+calc = Calculator();
+
+// Debug: Console only operations to test state logic
+console.log(calc.printArray());
+console.log(calc.getValue(3));
+console.log(calc.printValue())
+console.log(calc.printArray());
+console.log(calc.getOperator('multiply'));
+console.log(calc.printArray());
+console.log(calc.getValue(4));
+console.log('Array before evaluation:');
+console.log(calc.printArray());
+console.log(calc.evalExpression());
+console.log(calc.printValue());
+console.log(calc.printArray());
+console.log('New operator')
+console.log(calc.getOperator('add'));
+console.log(calc.getValue(2));
+console.log(calc.printArray());
+console.log(calc.evalExpression());
+console.log(calc.printValue());
+console.log(calc.printArray());
+
+// calc = calcExpression();
+// console.log(calc.add(1, 2));
+
+
+const ScreenController = (() => {
+
+    calc = Calculator();
+
+    const updateScreen = () => {
+
+    }
+
+    function appendNumber() {
+
+    }
+
+    function storeOperator() {
+
+    }
+
+    function evalExpression() {
+
+    }
+
+    return {
+
+    }
+
+})();
+
+
+
 numberButtons.forEach(button => button.addEventListener('click', appendNumber));
 operatorButtons.forEach(button => button.addEventListener('click', storeOperator));
 equalButton.addEventListener('click', calcEquation);

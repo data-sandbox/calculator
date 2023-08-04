@@ -1,182 +1,35 @@
-let firstNum = null;
-let secondNum = null;
-let operator = null;
-let displayValue = '';
-let clearDisplayFlag = false;
-
-const numberButtons = document.querySelectorAll('.number');
-const operatorButtons = document.querySelectorAll('.operator');
-const equalButton = document.querySelector('.equal');
-const clearButton = document.querySelector('.clear');
-const deleteButton = document.querySelector('.delete');
-const decimalButton = document.querySelector('.decimal');
-const percentButton = document.querySelector('.percent');
-
-function clearDisplay() {
-    displayValue = '';
-    document.getElementById('display-value').textContent = displayValue;
-}
-
-function appendNumber(e) {
-    if (clearDisplayFlag) {
-        clearDisplay();
-        clearDisplayFlag = false;
-    }
-    // console.log(this.id);
-    let number = this.id;
-    displayValue += number;
-    document.getElementById('display-value').textContent = displayValue;
-}
-
-function storeOperator(e) {
-    // console.log({ firstNum }, { secondNum });
-    if (!firstNum) {
-        operator = this.id;
-        firstNum = displayValue;
-        document.getElementById('equation-value').textContent = `${displayValue} ${this.value}`;
-        clearDisplayFlag = true;
-    } else {
-        secondNum = displayValue;
-    }
-    if (secondNum) {
-        let result = calcValue(operator, firstNum, secondNum); // use previously clicked operator
-        document.getElementById('equation-value').textContent += ` ${secondNum} ${this.value}`;
-        document.getElementById('display-value').textContent = null;
-        operator = this.id; // store latest operator
-        firstNum = result;
-        secondNum = displayValue;
-        displayValue = '';
-        clearDisplayFlag = true;
-    }
-}
-
-function clearValues() {
-    firstNum = null;
-    secondNum = null;
-    operator = null;
-    clearDisplayFlag = false;
-}
-
-// TODO
-// function countDecimals(number) {
-//     if (Math.floor(number) === number) return 0;
-//     return toString(number).split(".")[1].length || 0;
-// }
-
-// function round(result) {
-//     let precisionLimit = 7;
-//     if (typeof result === 'number' && Number.isInteger(result)) {
-//         return result;
-//     } else if (countDecimals(result) > precisionLimit) {
-//         return result.toFixed(precisionLimit);
-//     } else {
-//         return result;
-//     }
-// }
-
-function displayResult(result) {
-    // result = round(result);
-    document.getElementById('equation-value').textContent = ' ';
-    document.getElementById('display-value').textContent = result;
-    clearValues();
-    displayValue = result;
-    clearDisplayFlag = true;
-}
-
-function calcEquation() {
-    if (!firstNum) {
-        firstNum = displayValue;
-        displayResult(Number(firstNum));
-    } else {
-        secondNum = displayValue;
-        let result = calcValue(operator, firstNum, secondNum);
-        displayResult(result);
-    }
-}
-
-function clearAll() {
-    clearValues();
-    displayValue = '';
-    document.getElementById('display-value').textContent = 0;
-    document.getElementById('equation-value').textContent = null;
-}
-
-// TODO
-// function convertPercent(value) {
-//     value = toString(value)
-//     if (value.at(-1) === '%') {
-//         value = value.substring(0, value.length - 1);
-//         return Number(value) / 100;
-//     } else {
-//         return Number(value);
-//     }
-// }
-
-function calcValue(operator, a, b) {
-    console.log({ operator }, { a }, { b });
-    // a = Number(convertPercent(a));
-    // b = Number(convertPercent(b));
-    a = Number(a);
-    b = Number(b);
-    switch (operator) {
-        case 'add':
-            return a + b;
-        case 'subtract':
-            return a - b;
-        case 'multiply':
-            return a * b;
-        case 'divide':
-            if (b === 0) return 'undefined';
-            return a / b;
-        default:
-            return undefined;
-    }
-}
-
-function deleteChar() {
-    if (displayValue) {
-        // TODO: displayValue might be 'number'
-        displayValue = displayValue.substring(0, displayValue.length - 1);
-        document.getElementById('display-value').textContent = displayValue;
-    }
-}
-
-function insertDecimal() {
-    displayValue += '.';
-    document.getElementById('display-value').textContent = displayValue;
-}
-
-function insertPercent() {
-    displayValue += '%';
-    document.getElementById('display-value').textContent = displayValue;
-}
-
-
-// NEW FEATURES BELOW
-
 const Calculator = (() => {
 
     const values = [null, null];
     let currentValue = null;
     let operation = null;
+    let lastOperation = null;
 
     const add = (values) => values[0] + values[1];
     const subtract = (values) => values[0] - values[1];
     const multiply = (values) => values[0] * values[1];
     const divide = (values) => {
-        if (values[1] === 0) return 'undefined';
+        if (values[1] === 0) return undefined;
         return values[0] / values[1];
     }
 
     const getValue = (value) => {
         currentValue = value; // input from console or pull from DOM
-        updateValues();
     }
 
-    const getOperator = (operator) => operation = operator;
+    const getOperator = (operator) => {
+        if (values[0] !== null && values[1] !== null) {
+            evalExpression(values, lastOperation);
+        }
+        operation = operator;
+    }
 
     const updateValues = () => {
+        console.log(values[0])
+        console.log(values[1]) // TODO: null for some reason?
+        console.log({ operation })
         if (values[0] !== null && values[1] !== null) {
+            console.log('Here?')
             evalExpression(values, operation);
         } else if (values[0] !== null && values[1] === null) {
             storeValue(1, currentValue);
@@ -184,21 +37,27 @@ const Calculator = (() => {
             storeValue(0, currentValue);
             storeValue(1, null);
         }
+        console.log({ values })
     };
 
     const storeValue = (index, value) => {
         values[index] = value;
     };
 
-    const clearValues = () => {
+    const resetAll = () => {
         values[0] = null;
         values[1] = null;
+        currentValue = null;
+        operation = null;
     }
 
     const storeCurrentValue = () => {
         storeValue(0, currentValue);
         storeValue(1, null);
+        console.log({ values })
     }
+
+    const resetOperation = () => operation = null;
 
     const evalExpression = () => {
         switch (operation) {
@@ -215,18 +74,26 @@ const Calculator = (() => {
                 currentValue = divide(values);
                 break;
         };
+        lastOperation = operation;
+        resetOperation();
         storeCurrentValue();
+
     }
 
-    const printValue = () => console.log(currentValue);
+    const getCurrentValue = () => currentValue;
+
+    const printCurrentValue = () => console.log(currentValue); // for debug
 
     const printArray = () => console.log(values); // for debug
 
     return {
         getValue,
+        updateValues,
+        resetAll,
         getOperator,
         evalExpression,
-        printValue,
+        getCurrentValue,
+        printCurrentValue, // for debug
         printArray // for debug
     }
 
@@ -237,60 +104,103 @@ calc = Calculator();
 // Debug: Console only operations to test state logic
 console.log(calc.printArray());
 console.log(calc.getValue(3));
-console.log(calc.printValue())
+console.log(calc.updateValues());
+console.log(calc.printCurrentValue())
 console.log(calc.printArray());
 console.log(calc.getOperator('multiply'));
 console.log(calc.printArray());
 console.log(calc.getValue(4));
+console.log(calc.updateValues());
 console.log('Array before evaluation:');
 console.log(calc.printArray());
-console.log(calc.evalExpression());
-console.log(calc.printValue());
+// console.log(calc.evalExpression()); // works with this in there
+console.log(calc.printCurrentValue());
 console.log(calc.printArray());
 console.log('New operator')
+// console.log(calc.updateValues());
 console.log(calc.getOperator('add'));
 console.log(calc.getValue(2));
+console.log(calc.updateValues());
 console.log(calc.printArray());
 console.log(calc.evalExpression());
-console.log(calc.printValue());
+console.log(calc.printCurrentValue());
 console.log(calc.printArray());
+console.log(calc.evalExpression());
 
-// calc = calcExpression();
-// console.log(calc.add(1, 2));
+
 
 
 const ScreenController = (() => {
 
-    calc = Calculator();
+    const calc = Calculator();
+    const numberButtons = document.querySelectorAll('.number');
+    const operatorButtons = document.querySelectorAll('.operator');
+    const equalButton = document.querySelector('.equal');
+    const clearButton = document.querySelector('.clear');
+    const deleteButton = document.querySelector('.delete');
+
+    let displayValue = '';
 
     const updateScreen = () => {
-
+        let currentValue = calc.getCurrentValue();
+        console.log({ currentValue })
+        if (currentValue === undefined) {
+            console.log('Should say undefined')
+            document.getElementById('display-value').textContent = 'undefined';
+        } else if (currentValue === null || isNaN(currentValue)) { currentValue = 0 }
+        document.getElementById('display-value').textContent = currentValue;
     }
 
-    function appendNumber() {
+    const resetScreen = () => displayValue = '';
 
+    function numberHandler(e) {
+        let number = this.id;
+        displayValue += number;
+        // console.log({ displayValue })
+        calc.getValue(Number(displayValue));
+        calc.printCurrentValue();
+        updateScreen();
     }
 
-    function storeOperator() {
+    function operationHandler(e) {
+        calc.updateValues();
+        calc.printArray();
 
+        console.log(calc.printArray())
+        calc.getOperator(this.id);
+        resetScreen();
     }
 
-    function evalExpression() {
-
+    function evalHandler() {
+        calc.updateValues();
+        calc.evalExpression();
+        updateScreen();
+        resetScreen();
     }
+
+    function clearHandler() {
+        calc.resetAll();
+        resetScreen();
+        updateScreen();
+    }
+
+    function delHandler() {
+        displayValue = displayValue.substring(0, displayValue.length - 1);
+        console.log({ displayValue })
+        calc.getValue(Number(displayValue));
+        updateScreen();
+    }
+
+    numberButtons.forEach(button => button.addEventListener('click', numberHandler));
+    operatorButtons.forEach(button => button.addEventListener('click', operationHandler));
+    equalButton.addEventListener('click', evalHandler);
+    clearButton.addEventListener('click', clearHandler);
+    deleteButton.addEventListener('click', delHandler);
 
     return {
 
     }
 
-})();
+});
 
-
-
-numberButtons.forEach(button => button.addEventListener('click', appendNumber));
-operatorButtons.forEach(button => button.addEventListener('click', storeOperator));
-equalButton.addEventListener('click', calcEquation);
-clearButton.addEventListener('click', clearAll);
-deleteButton.addEventListener('click', deleteChar);
-decimalButton.addEventListener('click', insertDecimal);
-// percentButton.addEventListener('click', insertPercent);
+ScreenController();

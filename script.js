@@ -1,3 +1,8 @@
+/*
+TODO:
+- top line showing the expression
+*/
+
 const Calculator = (() => {
 
     const values = [null, null];
@@ -25,8 +30,8 @@ const Calculator = (() => {
     }
 
     const updateValues = () => {
-        console.log(values[0])
-        console.log(values[1]) // TODO: null for some reason?
+        // console.log(values[0])
+        // console.log(values[1])
         console.log({ operation })
         if (values[0] !== null && values[1] !== null) {
             console.log('Here?')
@@ -140,22 +145,43 @@ const ScreenController = (() => {
     const deleteButton = document.querySelector('.delete');
 
     let displayValue = '';
+    let expressionValue = '';
 
-    const updateScreen = () => {
+    const updateValueLine = () => {
         let currentValue = calc.getCurrentValue();
         console.log({ currentValue })
         if (currentValue === undefined) {
-            console.log('Should say undefined')
             document.getElementById('display-value').textContent = 'undefined';
+            return;
         } else if (currentValue === null || isNaN(currentValue)) { currentValue = 0 }
         document.getElementById('display-value').textContent = currentValue;
+    };
+
+    const appendExpressionLine = (char) => expressionValue += char;
+
+    const popExpressionLine = () => {
+        expressionValue = expressionValue.substring(0, expressionValue.length - 1);
     }
 
-    const resetScreen = () => displayValue = '';
+    const updateExpressionLine = () => {
+        document.getElementById('equation-value').textContent = expressionValue;
+    };
+
+    const updateScreen = () => {
+        updateValueLine();
+        updateExpressionLine();
+    }
+
+    const resetScreen = () => {
+        displayValue = '';
+    }
+
+    const resetExpression = () => expressionValue = '';
 
     function numberHandler(e) {
         let number = this.id;
         displayValue += number;
+        appendExpressionLine(number);
         // console.log({ displayValue })
         calc.getValue(Number(displayValue));
         calc.printCurrentValue();
@@ -168,6 +194,7 @@ const ScreenController = (() => {
 
         console.log(calc.printArray())
         calc.getOperator(this.id);
+        appendExpressionLine(this.value);
         resetScreen();
     }
 
@@ -175,12 +202,15 @@ const ScreenController = (() => {
         calc.updateValues();
         calc.evalExpression();
         updateScreen();
+        resetExpression();
+        updateExpressionLine();
         resetScreen();
     }
 
     function clearHandler() {
         calc.resetAll();
         resetScreen();
+        resetExpression();
         updateScreen();
     }
 
@@ -188,6 +218,7 @@ const ScreenController = (() => {
         displayValue = displayValue.substring(0, displayValue.length - 1);
         console.log({ displayValue })
         calc.getValue(Number(displayValue));
+        popExpressionLine();
         updateScreen();
     }
 
